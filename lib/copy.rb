@@ -1,27 +1,19 @@
-require 'pathname'
+# frozen_string_literal: true
 
-module Copy 
-  def self.copy(source, destination='./dist', limit=5) 
-    if source.nil? || destination.nil?
-      raise ArgumentError, "source and destination are required"
-    end
+# This module is used to copy files from a source directory to a destination directory.
+module Copy
+  def self.copy(source, destination = './dist', limit = 5)
+    raise ArgumentError, 'source and destination are required' if source.nil? || destination.nil?
 
-    if !File.directory?(source)
-      raise ArgumentError, "source is not a directory"
-    end
+    raise ArgumentError, 'source is not a directory' unless File.directory?(source)
 
-    if !File.directory?(destination)
-      raise ArgumentError, "destination is not a directory"
-    end
+    raise ArgumentError, 'destination is not a directory' unless File.directory?(destination)
 
     files = collect_files(source, limit)
-
     return if files.empty?
 
     mapped_files = map_files(files, destination, source)
-    mapped_directories = map_directories(files)
-
-    create_directories(mapped_directories, destination)
+    create_directories(files, destination)
 
     mapped_files.each do |original, mapped|
       FileUtils.cp(original, mapped)
@@ -29,19 +21,18 @@ module Copy
   end
 
   def self.map_file_to_directory(file)
-    unless file.file?
-      raise ArgumentError, "file is not a file"
-    end
+    raise ArgumentError, 'file is not a file' unless file.file?
+
     extension = file.extname.to_s
-    extension.empty? ? "other" : extension
+    extension.empty? ? 'other' : extension
   end
 
   def self.map_directories(files)
     files.map { |file| map_file_to_directory(file) }.uniq
   end
 
-  def self.create_directories(mapped_directories, destination)
-    mapped_directories.each do |directory|
+  def self.create_directories(files, destination)
+    map_directories(files).each do |directory|
       Pathname.new(destination).join(directory).mkpath
     end
   end
@@ -49,11 +40,11 @@ module Copy
   def self.map_file_to_path(original, destination, source, preserve)
     file_directory = map_file_to_directory(original)
     file_name = if preserve
-      original_directory = original.relative_path_from(source).dirname.to_s.gsub(File::SEPARATOR, '-')
-      "#{original.basename('.*')} (from #{original_directory})#{original.extname}"
-    else
-      original.basename
-    end
+                  original_directory = original.relative_path_from(source).dirname.to_s.gsub(File::SEPARATOR, '-')
+                  "#{original.basename('.*')} (from #{original_directory})#{original.extname}"
+                else
+                  original.basename
+                end
     Pathname.new(destination).join(file_directory, file_name)
   end
 
@@ -80,6 +71,4 @@ module Copy
     end
     files
   end
-
-
 end
