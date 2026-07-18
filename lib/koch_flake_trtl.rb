@@ -27,6 +27,8 @@ module KochFlake
   end
 end
 
+return unless __FILE__ == $0
+
 size = 300
 
 trtl = Trtl.new

@@ -16,3 +16,4 @@ end
 # sudo ln -s /usr/lib/x86_64-linux-gnu/libtcl8.6.so.0 /usr/lib/libtcl8.6.so.0
 # sudo ln -s /usr/lib/x86_64-linux-gnu/libtk8.6.so.0 /usr/lib/libtk8.6.so.0
 gem 'trtl', '~> 0.0.2'
+gem 'benchmark', '~> 0.5.0'
