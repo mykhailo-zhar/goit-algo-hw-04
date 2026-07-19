@@ -36,7 +36,7 @@ def copy(
     if not source_path.is_dir():
         raise ValueError("source is not a directory")
 
-    if not destination_path.is_dir():
+    if destination_path.exists() and not destination_path.is_dir():
         raise ValueError("destination is not a directory")
 
     files = collect_files(source_path, limit)
@@ -44,7 +44,7 @@ def copy(
         return
 
     mapped_files = map_files(files, destination_path, source_path)
-    create_directories(files, destination_path)
+    create_directories(mapped_files.values())
 
     for original, mapped in mapped_files.items():
         shutil.copy2(original, mapped)
@@ -70,17 +70,15 @@ def map_file_to_directory(file: Path) -> str:
     return "other" if extension == "" else extension
 
 
-def create_directories(files: list[Path], destination: str | Path) -> None:
+def create_directories(directories: list[Path]) -> None:
     """Create extension-based subdirectories under ``destination`` for ``files``.
 
     Args:
-        files: Files whose extensions determine which subdirectories to create.
-        destination: Root destination directory under which to create the
-            subdirectories.
+        directories: Directories to create.
     """
-    destination_path = Path(destination)
-    for directory in set(map_file_to_directory(file) for file in files):
-        (destination_path / directory).mkdir(parents=True, exist_ok=True)
+    parents = {directory.parent for directory in directories}
+    for parent in parents:
+        parent.mkdir(parents=True, exist_ok=True)
 
 
 def map_file_to_path(

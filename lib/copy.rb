@@ -7,13 +7,13 @@ module Copy
 
     raise ArgumentError, 'source is not a directory' unless File.directory?(source)
 
-    raise ArgumentError, 'destination is not a directory' unless File.directory?(destination)
+    raise ArgumentError, 'destination is not a directory' if File.exist?(destination) && !File.directory?(destination)
 
     files = collect_files(source, limit)
     return if files.empty?
 
     mapped_files = map_files(files, destination, source)
-    create_directories(files, destination)
+    create_directories(mapped_files.values)
 
     mapped_files.each do |original, mapped|
       FileUtils.cp(original, mapped)
@@ -31,10 +31,9 @@ module Copy
     files.map { |file| map_file_to_directory(file) }.uniq
   end
 
-  def self.create_directories(files, destination)
-    map_directories(files).each do |directory|
-      Pathname.new(destination).join(directory).mkpath
-    end
+  def self.create_directories(directories)
+    parents = directories.map(&:parent).uniq
+    parents.each(&:mkpath)
   end
 
   def self.map_file_to_path(original, destination, source, preserve)
