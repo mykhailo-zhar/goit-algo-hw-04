@@ -15,7 +15,6 @@ def create_source_dir(tmp_dir: Path) -> Path:
 
 def create_destination_dir(tmp_dir: Path) -> Path:
     dir_name = tmp_dir / "destination"
-    dir_name.mkdir()
     return dir_name
 
 
