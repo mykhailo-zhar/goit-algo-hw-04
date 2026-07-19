@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import argparse
 
-from file_copy import copy
+from .file_copy import copy
 
 
 def main() -> None:
