@@ -102,7 +102,7 @@ def benchmark() -> None:
 
     Benchmarks insertion sort, merge sort, quicksort, and ``sorted``
     (Timsort) on random, sorted, reversed, and nearly sorted arrays of
-    sizes 10, 1000, and 10000. Prints timings in milliseconds.
+    sizes 10, 100, 1000, and 10000. Prints timings in milliseconds.
     """
     SORT_ALGORITHMS = {
         "insertion_sort": insertion_sort,
@@ -119,7 +119,7 @@ def benchmark() -> None:
         "nearly_sorted": create_nearly_sorted_array,
     }
 
-    for sample_size in [10, 1000, 10000]:
+    for sample_size in [10, 100, 1000, 10000]:
         print(f"Sample size: {sample_size}")
         print("-" * 10)
         for sort_algorithm_name, sort_algorithm in SORT_ALGORITHMS.items():

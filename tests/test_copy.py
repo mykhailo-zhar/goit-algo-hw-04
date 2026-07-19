@@ -81,3 +81,71 @@ class TestCopy:
 
         assert count_files(destination_dir, ".js") == 2
         assert count_files(destination_dir, ".txt") == 2
+
+    def test_raises_permission_error_when_reading_source(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        source_dir = create_source_dir(tmp_path)
+        destination_dir = create_destination_dir(tmp_path)
+        create_file(source_dir, "test.txt")
+
+        original_iterdir = Path.iterdir
+
+        def deny_iterdir(self: Path):
+            if self.resolve() == source_dir.resolve():
+                raise PermissionError("Permission denied")
+            return original_iterdir(self)
+
+        monkeypatch.setattr(Path, "iterdir", deny_iterdir)
+
+        with pytest.raises(PermissionError):
+            copy(source_dir, destination_dir)
+
+    def test_raises_permission_error_when_copying_file(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        source_dir = create_source_dir(tmp_path)
+        destination_dir = create_destination_dir(tmp_path)
+        create_file(source_dir, "test.txt")
+
+        def deny_copy(*_args, **_kwargs):
+            raise PermissionError("Permission denied")
+
+        monkeypatch.setattr("src.file_copy.shutil.copy2", deny_copy)
+
+        with pytest.raises(PermissionError):
+            copy(source_dir, destination_dir)
+
+    def test_raises_os_error_when_reading_source(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        source_dir = create_source_dir(tmp_path)
+        destination_dir = create_destination_dir(tmp_path)
+        create_file(source_dir, "test.txt")
+
+        original_iterdir = Path.iterdir
+
+        def fail_iterdir(self: Path):
+            if self.resolve() == source_dir.resolve():
+                raise OSError("I/O error")
+            return original_iterdir(self)
+
+        monkeypatch.setattr(Path, "iterdir", fail_iterdir)
+
+        with pytest.raises(OSError, match="OS error while copying"):
+            copy(source_dir, destination_dir)
+
+    def test_raises_os_error_when_copying_file(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        source_dir = create_source_dir(tmp_path)
+        destination_dir = create_destination_dir(tmp_path)
+        create_file(source_dir, "test.txt")
+
+        def fail_copy(*_args, **_kwargs):
+            raise OSError("No space left on device")
+
+        monkeypatch.setattr("src.file_copy.shutil.copy2", fail_copy)
+
+        with pytest.raises(OSError, match="OS error while copying"):
+            copy(source_dir, destination_dir)
