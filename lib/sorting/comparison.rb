@@ -5,13 +5,12 @@ require_relative 'insertion_sort'
 require_relative 'merge_sort'
 require_relative 'quick_sort'
 
-
 module Sorting
+  # This module is used to compare the sorting algorithms
   module Comparison
-    def self.generate_random_array(size = 100, max = 100) 
-      Array.new(size) { rand(max) } 
+    def self.generate_random_array(size = 100, max = 100)
+      Array.new(size) { rand(max) }
     end
-
 
     def self.generate_reverse_sorted_array(size = 100)
       Array.new(size) { |i| size - i }
@@ -25,13 +24,14 @@ module Sorting
       array = Array.new(size) { |i| i }
       (0...size).each do |i|
         next unless rand < chance_of_swap
-        
-        j = rand(max_swap_distance) - max_swap_distance / 2
-        j = j <= size - i - 1 ? j : size - i - 1
-        j = i + j < 0 ? -j : j
-        array[i], array[i + j] = array[i + j], array[i]
+
+        min_swap_distance = [i - max_swap_distance, 0].max
+        max_swap_distance = [size - 1, i + max_swap_distance].min
+
+        j = rand(min_swap_distance...max_swap_distance)
+        array[i], array[j] = array[j], array[i]
       end
-      
+
       array
     end
 
@@ -43,14 +43,13 @@ module Sorting
         x.report('Quick sort') { Sorting::QuickSort.sort(array) }
       end
     end
-  
   end
 end
 
 return if __FILE__ != $0
 
 SEPARATOR = "--------------------------------\n\n"
-SECTION_SEPARATOR = "\n"*4
+SECTION_SEPARATOR = "\n" * 4
 
 (1..4).each do |i|
   puts "Comparing random array size: #{10**i} elements"
