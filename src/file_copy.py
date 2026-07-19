@@ -26,6 +26,8 @@ def copy(
     Raises:
         ValueError: If ``source`` or ``destination`` is ``None``, or if either
             path is not an existing directory.
+        PermissionError: If access to a file or directory is denied.
+        OSError: If a filesystem error occurs while reading or copying.
     """
     if source is None or destination is None:
         raise ValueError("source and destination are required")
@@ -39,15 +41,22 @@ def copy(
     if destination_path.exists() and not destination_path.is_dir():
         raise ValueError("destination is not a directory")
 
-    files = collect_files(source_path, limit)
-    if not files:
-        return
+    try:
+        files = collect_files(source_path, limit)
+        if not files:
+            return
 
-    mapped_files = map_files(files, destination_path, source_path)
-    create_directories(mapped_files.values())
+        mapped_files = map_files(files, destination_path, source_path)
+        create_directories(mapped_files.values())
 
-    for original, mapped in mapped_files.items():
-        shutil.copy2(original, mapped)
+        for original, mapped in mapped_files.items():
+            shutil.copy2(original, mapped)
+    except PermissionError:
+        raise
+    except OSError as exc:
+        raise OSError(
+            f"OS error while copying from {source_path} to {destination_path}: {exc}"
+        ) from exc
 
 
 def map_file_to_directory(file: Path) -> str:
