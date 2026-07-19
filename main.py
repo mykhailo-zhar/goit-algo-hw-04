@@ -1,6 +1,4 @@
-def main():
-    print("Hello from goit-pycore-hw-04!")
-
+from src.sorting.benchmark import benchmark
 
 if __name__ == "__main__":
-    main()
+    benchmark()
