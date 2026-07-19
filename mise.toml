@@ -5,6 +5,7 @@ min_version = "2024.9.5"
 PROJECT_NAME = "{{ config_root | basename }}"
 SOURCEDIR    = "docs/source"
 BUILDDIR     = "docs/build"
+SPHINXBUILD  = "python -m sphinx"
 
 # Automatic virtualenv activation
 _.python.venv = { path = ".venv" }
